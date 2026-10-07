@@ -1,0 +1,130 @@
+.khami-revenue-chart {
+  width: 100%;
+  height: 220px;
+  min-width: 0;
+  font-family: "DM Sans", sans-serif;
+}
+
+.khami-category-chart {
+  min-height: 205px;
+  padding-top: 12px;
+  font-family: "DM Sans", sans-serif;
+}
+
+.khami-category-rows {
+  display: grid;
+  gap: 18px;
+}
+
+.khami-category-row {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr) 46px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.khami-category-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 10px;
+  color: #69726b;
+}
+
+.khami-category-track {
+  height: 15px;
+}
+
+.khami-category-bar {
+  height: 100%;
+  min-width: 2px;
+  border-radius: 3px;
+}
+
+.khami-category-value {
+  text-align: right;
+  color: #667068;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.khami-category-caption {
+  margin-top: 24px;
+  font-size: 10px;
+  text-align: center;
+  color: #92988f;
+}
+
+.khami-customer-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "DM Sans", sans-serif;
+}
+
+.khami-customer-ring {
+  width: 155px;
+  height: 155px;
+  position: relative;
+}
+
+.khami-customer-total {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  gap: 2px;
+}
+
+.khami-customer-total strong {
+  font-family: "Manrope", "DM Sans", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  color: #25382c;
+}
+
+.khami-customer-total span {
+  font-size: 10px;
+  color: #8c948c;
+}
+
+.khami-customer-legend {
+  width: 100%;
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.khami-customer-legend-row {
+  display: grid;
+  grid-template-columns: 7px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  color: #737b73;
+  font-size: 10px;
+}
+
+.khami-customer-legend-row strong {
+  color: #4b594e;
+  font-weight: 500;
+}
+
+.khami-chart-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+@media (max-width: 600px) {
+  .khami-category-row {
+    grid-template-columns: 94px minmax(0, 1fr) 48px;
+  }
+  .khami-customer-legend {
+    max-width: 250px;
+  }
+}
