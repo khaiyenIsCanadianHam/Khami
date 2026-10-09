@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
   ArrowRight,
-  ArrowUpRight,
   Bell,
   BookOpen,
   ChartNoAxesCombined,
@@ -18,7 +17,6 @@ import {
   Loader2,
   LockKeyhole,
   Menu,
-  MoreHorizontal,
   Plus,
   Search,
   Settings2,
@@ -204,7 +202,7 @@ export default function App() {
           setSelectedId(info.id);
           setNotificationRead(false);
           notify(
-            "Your analysis is ready. There’s a clearer picture waiting for you.",
+            "Your analysis is complete. View the results on the overview page.",
           );
         }
         setRunningInfo(null);
@@ -391,7 +389,7 @@ export default function App() {
       ),
       "application/json",
     );
-    notify("Your detailed report has been downloaded.");
+    notify("Report downloaded.");
   }
   function rerun() {
     if (!selected || !activeConnections.length) {
@@ -449,16 +447,14 @@ export default function App() {
             aria-expanded={workspaceMenu}
             onClick={() => setWorkspaceMenu(!workspaceMenu)}
           >
-            <span className="workspace-avatar">N</span>
+            <span className="workspace-avatar">
+              <Database size={17} />
+            </span>
             <span>
               <strong>
                 {settings.demo ? "Northstar workspace" : "My workspace"}
               </strong>
-              <small>
-                {settings.demo
-                  ? "Let’s see the bigger picture"
-                  : "Your local business data"}
-              </small>
+              <small>{settings.demo ? "Sample data" : "Local data"}</small>
             </span>
             <ChevronDown size={14} />
           </button>
@@ -469,7 +465,7 @@ export default function App() {
                 <FlaskConical size={15} />
                 {settings.demo
                   ? "Switch to your live data"
-                  : "Explore the demo workspace"}
+                  : "Switch to sample data"}
                 <ArrowRight size={14} />
               </button>
               <button onClick={() => navigate("settings")}>
@@ -492,28 +488,13 @@ export default function App() {
               {item.id === "analyses" && activeRecords.length > 0 && (
                 <span className="nav-count">{activeRecords.length}</span>
               )}
-              {item.id === "predictions" && (
-                <span className="nav-new">NEW</span>
-              )}
             </button>
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="local-card">
-            <span className="local-card-icon">
-              <LockKeyhole size={17} />
-            </span>
-            <strong>A little peace of mind.</strong>
-            <p>
-              Your data stays on
-              <br />
-              your machine. Always.
-            </p>
-            <span className="local-card-caption">
-              <span className="status-dot" />
-              PRIVATE BY DESIGN
-            </span>
-            <span className="local-card-art" aria-hidden="true" />
+          <div className="local-status">
+            <LockKeyhole size={16} />
+            <span>Local processing</span>
           </div>
           <button
             className={`nav-item ${page === "settings" ? "active" : ""}`}
@@ -524,23 +505,8 @@ export default function App() {
           </button>
           <button className="nav-item" onClick={() => setHelp(true)}>
             <CircleHelp size={18} strokeWidth={1.7} />
-            <span>A little help</span>
-            <ArrowUpRight size={14} className="nav-trailing" />
+            <span>Help</span>
           </button>
-          <div className="sidebar-user">
-            <span className="user-avatar">YO</span>
-            <div>
-              <strong>Your workspace</strong>
-              <small>Workspace owner</small>
-            </div>
-            <button
-              className="icon-button"
-              aria-label="Owner settings"
-              onClick={() => navigate("settings")}
-            >
-              <MoreHorizontal size={19} />
-            </button>
-          </div>
         </div>
       </aside>
       <div className="main-shell">
@@ -604,7 +570,7 @@ export default function App() {
               {notifications && (
                 <div className="popover notifications-popover">
                   <div className="popover-heading">
-                    <strong>Your latest updates</strong>
+                    <strong>Recent updates</strong>
                     <button
                       className="icon-button"
                       aria-label="Close notifications"
@@ -629,9 +595,9 @@ export default function App() {
                           <strong>{record.name}</strong>
                           <small>
                             {record.status === "completed"
-                              ? "Your insights are ready to explore."
+                              ? "Analysis complete."
                               : record.status === "running"
-                                ? "Your data is being explored."
+                                ? "Analysis in progress."
                                 : "This analysis needs attention."}
                           </small>
                         </span>
@@ -639,19 +605,18 @@ export default function App() {
                     ))
                   ) : (
                     <p className="popover-empty">
-                      You’re all caught up. Updates from your analyses will
-                      appear here.
+                      No updates yet. Analysis updates will appear here.
                     </p>
                   )}
                 </div>
               )}
             </div>
             <button
-              className="topbar-avatar"
+              className="icon-button workspace-settings-button"
               aria-label="Open workspace settings"
               onClick={() => navigate("settings")}
             >
-              YO
+              <Settings2 size={18} />
             </button>
           </div>
         </header>
@@ -676,14 +641,8 @@ export default function App() {
             <>
               <div className="page-heading">
                 <div>
-                  <div className="eyebrow">
-                    <span />
-                    THE STARTING POINT
-                  </div>
-                  <h1>
-                    Good data lives here<span className="heading-dot">.</span>
-                  </h1>
-                  <p>Your connected databases, ready to tell their story.</p>
+                  <h1>Data sources</h1>
+                  <p>Manage the databases Khami uses for analysis.</p>
                 </div>
                 <Button onClick={() => setWizard("source")}>
                   <Plus size={17} />
@@ -694,7 +653,7 @@ export default function App() {
                 <div className="demo-banner">
                   <FlaskConical size={18} />
                   <div>
-                    <strong>A safe place to explore.</strong>
+                    <strong>You’re viewing sample data.</strong>
                     <span>
                       These are sample sources. Switch to your live workspace in
                       Settings to connect your own data.
@@ -761,14 +720,14 @@ export default function App() {
                   <span>
                     <Plus size={24} strokeWidth={1.5} />
                   </span>
-                  <strong>Bring another source into the picture</strong>
-                  <p>Connect a database to uncover more.</p>
+                  <strong>Connect another database</strong>
+                  <p>Add a source for your analyses.</p>
                 </button>
               </div>
               <div className="sources-privacy">
                 <ShieldCheck size={20} />
                 <div>
-                  <strong>A direct connection. A private workspace.</strong>
+                  <strong>Processed by your local engine</strong>
                   <p>
                     Khami reads through your local Python engine. Database
                     access and data processing happen on your machine.
@@ -781,15 +740,8 @@ export default function App() {
             <>
               <div className="page-heading">
                 <div>
-                  <div className="eyebrow">
-                    <span />
-                    YOUR EXPLORATIONS
-                  </div>
-                  <h1>
-                    From data to understanding
-                    <span className="heading-dot">.</span>
-                  </h1>
-                  <p>Every exploration is a step toward a better decision.</p>
+                  <h1>Analyses</h1>
+                  <p>Run a new analysis or review previous results.</p>
                 </div>
                 <Button onClick={newAnalysis}>
                   <Plus size={17} />
@@ -818,7 +770,7 @@ export default function App() {
                         ).length
                       }
                     </strong>
-                    <small>Ready to explore</small>
+                    <small>Completed</small>
                   </span>
                 </div>
                 <div>
@@ -856,7 +808,7 @@ export default function App() {
                     onChange={(event) => setAnalysisFilter(event.target.value)}
                   >
                     <option value="all">All analyses</option>
-                    <option value="completed">Ready to explore</option>
+                    <option value="completed">Completed</option>
                     <option value="running">In progress</option>
                     <option value="failed">Needs attention</option>
                   </Select>
@@ -872,7 +824,7 @@ export default function App() {
                     title={
                       activeRecords.length
                         ? "No matching analyses"
-                        : "Your first insight is waiting"
+                        : "No analyses yet"
                     }
                     description={
                       activeRecords.length
@@ -896,13 +848,10 @@ export default function App() {
             <>
               <div className="page-heading">
                 <div>
-                  <div className="eyebrow">
-                    <span />A LOOK AHEAD
-                  </div>
-                  <h1>
-                    What could come next<span className="heading-dot">.</span>
-                  </h1>
-                  <p>Put your insights to work on new data.</p>
+                  <h1>Predictions</h1>
+                  <p>
+                    Upload new records to use what your analysis has learned.
+                  </p>
                 </div>
                 <Badge tone="gray">
                   <LockKeyhole size={13} />
@@ -921,14 +870,8 @@ export default function App() {
             <>
               <div className="page-heading">
                 <div>
-                  <div className="eyebrow">
-                    <span />
-                    MAKE IT YOURS
-                  </div>
-                  <h1>
-                    A workspace that fits<span className="heading-dot">.</span>
-                  </h1>
-                  <p>Manage your local engine and the way you use Khami.</p>
+                  <h1>Settings</h1>
+                  <p>Configure your local engine and workspace.</p>
                 </div>
               </div>
               <Settings settings={settings} onSave={saveSettings} />
@@ -958,14 +901,14 @@ export default function App() {
         <Modal
           title={
             job.status === "completed"
-              ? "A clearer picture is ready"
+              ? "Analysis complete"
               : job.status === "failed"
-                ? "Let’s take another look"
-                : "Good insights take a little care"
+                ? "Analysis needs attention"
+                : "Analysis in progress"
           }
           subtitle={
             settings.demo
-              ? "Sample analysis · A preview of your future workflow"
+              ? "Demo run using sample data"
               : "Your data is being processed on your machine."
           }
           onClose={() => setShowProgress(false)}
@@ -976,7 +919,7 @@ export default function App() {
                 <span className="progress-status-icon failed">
                   <XCircle size={30} />
                 </span>
-                <h3>We couldn’t confidently explain this data.</h3>
+                <h3>This analysis didn’t pass the quality check.</h3>
                 <p className="progress-message" role="alert">
                   {job.message}
                 </p>
@@ -991,19 +934,18 @@ export default function App() {
                 <span className="progress-status-icon">
                   <CheckCircle2 size={32} />
                 </span>
-                <h3>A little more clarity. A lot more possibility.</h3>
+                <h3>Your results are ready.</h3>
                 <p className="progress-message">
-                  Your data has been explored and your findings have passed
-                  their checks.
+                  This analysis has passed the quality checks.
                 </p>
                 <div className="completion-summary">
                   <div>
                     <strong>{job.result?.rows.toLocaleString()}</strong>
-                    <span>rows explored</span>
+                    <span>records analyzed</span>
                   </div>
                   <div>
                     <strong>{job.result?.insights.length}</strong>
-                    <span>useful insights</span>
+                    <span>findings</span>
                   </div>
                   <div>
                     <strong>
@@ -1028,7 +970,7 @@ export default function App() {
                   <div>
                     <strong>
                       {job.status === "retrying"
-                        ? "Giving your data another careful look"
+                        ? "Checking the data again"
                         : pipelineSteps[Math.min(5, Math.max(0, job.step))]
                             .title}
                     </strong>
@@ -1045,8 +987,8 @@ export default function App() {
                 </div>
                 {job.status === "retrying" && (
                   <div className="retry-note">
-                    The first pass wasn’t reliable enough. Your engine is
-                    refining the data and trying again.
+                    The results need another check. The engine is preparing the
+                    data and trying again.
                   </div>
                 )}
                 <div className="pipeline-steps">
@@ -1074,8 +1016,7 @@ export default function App() {
                 </div>
                 <div className="helper-note">
                   <LockKeyhole size={15} />
-                  You can keep exploring Khami. We’ll let you know when it’s
-                  ready.
+                  You can continue using Khami while this analysis runs.
                 </div>
               </>
             )}
@@ -1083,7 +1024,7 @@ export default function App() {
           <footer className="modal-footer">
             <Badge tone="gray">
               <ShieldCheck size={12} />
-              Private by design
+              Local processing
             </Badge>
             {job.status === "completed" ? (
               <Button
@@ -1092,7 +1033,7 @@ export default function App() {
                   navigate("overview");
                 }}
               >
-                Explore my insights
+                View results
                 <ArrowRight size={16} />
               </Button>
             ) : job.status === "failed" ? (
@@ -1118,7 +1059,7 @@ export default function App() {
       )}
       {insight && (
         <Modal
-          title="A closer look"
+          title="Insight details"
           subtitle={
             settings.demo ? "From your sample retail analysis" : result?.name
           }
@@ -1129,19 +1070,17 @@ export default function App() {
               <Sparkles size={27} />
             </span>
             <Badge tone={insight.tone === "warning" ? "amber" : "green"}>
-              {insight.tone === "warning"
-                ? "Worth a closer look"
-                : "An opportunity to explore"}
+              {insight.tone === "warning" ? "Review suggested" : "Finding"}
             </Badge>
             <h3>{insight.title}</h3>
             <p>{insight.description}</p>
             <div className="insight-next-step">
               <LightbulbIcon />
               <div>
-                <strong>A thoughtful next step</strong>
+                <strong>How to use this finding</strong>
                 <p>
-                  Compare this finding with what you see day to day. Your
-                  business context helps turn a pattern into the right decision.
+                  Check this result against your business records before making
+                  a decision.
                 </p>
               </div>
             </div>
@@ -1159,11 +1098,11 @@ export default function App() {
                 exportReport();
               }}
             >
-              Save full report
+              Export report
               <FileText size={15} />
             </Button>
             <Button onClick={() => setInsight(null)}>
-              Got it
+              Close
               <Check size={16} />
             </Button>
           </footer>
@@ -1206,7 +1145,7 @@ export default function App() {
                 newAnalysis();
               }}
             >
-              Explore this data
+              Analyze this data
               <ArrowRight size={16} />
             </Button>
           </footer>
@@ -1247,8 +1186,8 @@ export default function App() {
       )}
       {help && (
         <Modal
-          title="A little help goes a long way"
-          subtitle="You bring the business knowledge. Khami brings the clearer picture."
+          title="Help"
+          subtitle="How to connect data, run an analysis, and use the results."
           onClose={() => setHelp(false)}
         >
           <div className="help-body">
@@ -1257,7 +1196,7 @@ export default function App() {
                 <Database size={22} />
               </span>
               <section>
-                <h3>Start with the data you already have</h3>
+                <h3>Connect your data</h3>
                 <p>
                   Connect a database, choose a few tables, and tell us what they
                   contain. Use the demo workspace to try it first.
@@ -1269,7 +1208,7 @@ export default function App() {
                 <ChartNoAxesCombined size={22} />
               </span>
               <section>
-                <h3>Choose a question, or stay curious</h3>
+                <h3>Choose your goal</h3>
                 <p>
                   Focus on an outcome you want to understand, or let Khami
                   discover customer groups and interesting patterns.
@@ -1281,7 +1220,7 @@ export default function App() {
                 <ShieldCheck size={22} />
               </span>
               <section>
-                <h3>Trust is earned, one check at a time</h3>
+                <h3>Understand the quality checks</h3>
                 <p>
                   The engine checks results before sharing them. Predictions
                   need at least 60% accuracy; discovered patterns must pass
@@ -1303,7 +1242,7 @@ export default function App() {
             </div>
           </div>
           <footer className="modal-footer">
-            <span className="help-footer">A little clarity changes a lot.</span>
+            <span className="help-footer"></span>
             <Button
               onClick={() => {
                 setHelp(false);

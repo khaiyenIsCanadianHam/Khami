@@ -3,10 +3,8 @@ import {
   CheckCircle2,
   Database,
   FlaskConical,
-  LockKeyhole,
   PlugZap,
   Server,
-  ShieldCheck,
   Terminal,
   XCircle,
 } from "lucide-react";
@@ -37,8 +35,8 @@ export default function Settings({
         throw new Error("The local service is running but is not ready yet.");
       setStatus(
         result.engine_ready
-          ? "Connected. Your Python engine is ready to work."
-          : "The local API is running. Connect your Python engine adapter to start analyzing real data.",
+          ? "Connected. Your engine is ready."
+          : "The API is running. Connect your Python program using the adapter to analyze your data.",
       );
     } catch (error) {
       setError(errorMessage(error));
@@ -69,8 +67,8 @@ export default function Settings({
                 <Server size={20} />
               </span>
               <div>
-                <h3>Your local engine</h3>
-                <p>The connection between Khami and your Python program.</p>
+                <h3>Engine connection</h3>
+                <p>Connect Khami to your Python program.</p>
               </div>
             </div>
             <Badge tone="gray">Owner settings</Badge>
@@ -89,7 +87,7 @@ export default function Settings({
                 placeholder="http://localhost:8000"
               />
               <span className="field-help">
-                The API runs on the same machine as this app.
+                Use http://localhost:8000 for an engine running on this machine.
               </span>
             </label>
             <Button variant="secondary" loading={busy} onClick={test}>
@@ -117,24 +115,20 @@ export default function Settings({
                 <FlaskConical size={20} />
               </span>
               <div>
-                <h3>Make yourself at home</h3>
-                <p>Explore Khami before connecting your business data.</p>
+                <h3>Sample data</h3>
               </div>
             </div>
           </div>
           <div className="settings-body">
             <div className="toggle-row">
               <div>
-                <strong>Use demo workspace</strong>
-                <p>
-                  Try every step with a fictional retail business and sample
-                  results.
-                </p>
+                <strong>Use sample data</strong>
+                <p>Try the app with a fictional retail business.</p>
               </div>
               <button
                 role="switch"
                 aria-checked={draft.demo}
-                aria-label="Use demo workspace"
+                aria-label="Use sample data"
                 className={`toggle ${draft.demo ? "on" : ""}`}
                 onClick={() => {
                   setDraft({ ...draft, demo: !draft.demo });
@@ -146,7 +140,7 @@ export default function Settings({
             </div>
             <div className="helper-note">
               <Database size={16} />
-              Demo and live data are kept in separate workspaces.
+              Sample data and your connected data are kept separate.
             </div>
           </div>
         </section>
@@ -159,44 +153,25 @@ export default function Settings({
               </>
             )}
           </span>
-          <Button onClick={save}>{saved ? "Saved" : "Save changes"}</Button>
+          <Button onClick={save}>{saved ? "Saved" : "Save settings"}</Button>
         </div>
       </div>
       <aside>
         <div className="local-promise">
-          <span className="promise-icon">
-            <LockKeyhole size={24} />
-          </span>
-          <h3>
-            Your business.
-            <br />
-            Your data. Your machine.
-          </h3>
+          <h3>Where your data goes</h3>
           <p>
-            Your database credentials and business data stay between this
-            browser and your local Python engine.
+            Connection details and prediction files are sent to the engine
+            address you choose. Use a local address to process them on your
+            machine.
           </p>
-          <ul>
-            <li>
-              <ShieldCheck size={15} />
-              No cloud data uploads
-            </li>
-            <li>
-              <ShieldCheck size={15} />
-              No passwords stored in this browser
-            </li>
-            <li>
-              <ShieldCheck size={15} />
-              You control the connection
-            </li>
-          </ul>
+          <p>Database passwords aren’t saved in this browser.</p>
         </div>
         <div className="setup-guide">
           <Terminal size={19} />
-          <h4>Connecting your Python engine</h4>
+          <h4>Start your engine</h4>
           <p>
-            Start the included local API, then connect your existing program
-            with its adapter. The setup guide walks through each step.
+            The included API needs an adapter for your Python program before it
+            can analyze real data.
           </p>
           <code>python -m uvicorn backend.app:app</code>
           <small>See README.md and docs/ENGINE_API.md in your project.</small>

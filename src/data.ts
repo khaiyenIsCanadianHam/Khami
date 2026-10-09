@@ -72,21 +72,20 @@ export const sampleResult: AnalysisResult = {
   ],
   insights: [
     {
-      title: "Your repeat customers are your best customers",
-      description:
-        "Returning customers generate 68% of your revenue. A little appreciation could go a long way.",
+      title: "Returning customers generate most revenue",
+      description: "Returning customers account for 68% of revenue.",
       tone: "positive",
     },
     {
-      title: "Electronics is having a moment",
+      title: "Electronics sales increased",
       description:
-        "Sales are up 23% this quarter, making electronics your fastest-growing category.",
+        "Sales increased 23% this quarter, the largest increase of any category.",
       tone: "info",
     },
     {
-      title: "A few orders deserve a second look",
+      title: "12 orders need review",
       description:
-        "12 orders look different from your usual pattern. Reviewing them could help keep your data accurate.",
+        "These orders differ from the usual pattern. Check them for errors or unusual activity.",
       tone: "warning",
     },
   ],
@@ -137,28 +136,27 @@ export const sampleAnalyses: AnalysisRecord[] = [
 
 export const pipelineSteps = [
   {
-    title: "Getting to know your data",
-    description: "Checking columns, dates, and the meaning behind your labels.",
+    title: "Inspect data",
+    description: "Check column types and the categories you selected.",
   },
   {
-    title: "Tidying things up",
-    description: "Taking care of empty entries and duplicate records.",
+    title: "Clean records",
+    description: "Handle missing values and duplicate records.",
   },
   {
-    title: "Looking for the bigger picture",
-    description: "Exploring trends, relationships, and interesting patterns.",
+    title: "Explore trends",
+    description: "Look for trends and relationships in the data.",
   },
   {
-    title: "Preparing the details",
-    description: "Refining your data so every comparison is a fair one.",
+    title: "Prepare data",
+    description: "Prepare the data for analysis and check it again.",
   },
   {
-    title: "Connecting the dots",
-    description:
-      "Finding the most useful way to answer your business questions.",
+    title: "Find patterns",
+    description: "Learn from past records or find groups, based on your goal.",
   },
   {
-    title: "Double-checking our work",
-    description: "Making sure the findings are consistent and reliable.",
+    title: "Check results",
+    description: "Check the results before showing them on your dashboard.",
   },
 ];

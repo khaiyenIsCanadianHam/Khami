@@ -18,7 +18,7 @@
 
 .khami-category-row {
   display: grid;
-  grid-template-columns: 86px minmax(0, 1fr) 46px;
+  grid-template-columns: 108px minmax(0, 1fr) 52px;
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -28,7 +28,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 10px;
+  font-size: 12px;
   color: #69726b;
 }
 
@@ -45,13 +45,13 @@
 .khami-category-value {
   text-align: right;
   color: #667068;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
 .khami-category-caption {
   margin-top: 24px;
-  font-size: 10px;
+  font-size: 12px;
   text-align: center;
   color: #92988f;
 }
@@ -89,8 +89,8 @@
 }
 
 .khami-customer-total span {
-  font-size: 10px;
-  color: #8c948c;
+  font-size: 12px;
+  color: #778371;
 }
 
 .khami-customer-legend {
@@ -105,8 +105,8 @@
   grid-template-columns: 7px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  color: #737b73;
-  font-size: 10px;
+  color: #687760;
+  font-size: 12px;
 }
 
 .khami-customer-legend-row strong {
@@ -122,9 +122,31 @@
 
 @media (max-width: 600px) {
   .khami-category-row {
-    grid-template-columns: 94px minmax(0, 1fr) 48px;
+    grid-template-columns: 99px minmax(0, 1fr) 48px;
   }
   .khami-customer-legend {
     max-width: 250px;
+  }
+}
+
+@media (max-width: 1200px) and (min-width: 521px) {
+  .khami-category-row {
+    grid-template-columns: 80px minmax(0, 1fr) 43px;
+    gap: 8px;
+  }
+  .khami-category-label,
+  .khami-category-value {
+    font-size: 11px;
+  }
+}
+@media (max-width: 520px) {
+  .khami-customer-legend-row {
+    grid-template-columns: 6px minmax(0, 1fr);
+    gap: 5px 7px;
+    font-size: 11px;
+  }
+  .khami-customer-legend-row strong {
+    grid-column: 2;
+    font-size: 12px;
   }
 }

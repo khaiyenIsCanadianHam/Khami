@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Download,
   FileSpreadsheet,
-  Lightbulb,
   Loader2,
   ShieldCheck,
   Sparkles,
@@ -81,7 +80,7 @@ export default function Predictions({
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError("This file is a little large. Please use a CSV under 5 MB.");
+      setError("This file is too large. Use a CSV under 5 MB.");
       return;
     }
     loadCsv(await file.text(), file.name);
@@ -100,7 +99,7 @@ export default function Predictions({
             ...row,
             predicted_outcome: [
               "Likely to return",
-              "May need a nudge",
+              "Less likely to return",
               "Likely to return",
             ][index % 3],
             confidence: `${[94, 82, 91, 88, 96][index % 5]}%`,
@@ -121,11 +120,11 @@ export default function Predictions({
       <div className="card">
         <EmptyState
           icon={<Sparkles size={28} />}
-          title="First, give Khami something to learn from"
-          description="Run an analysis focused on a specific outcome. Then use what Khami learns to make predictions about new data."
+          title="Run an analysis first"
+          description="Choose “Predict an outcome” in a new analysis. Once it passes the quality check, you can use it to predict outcomes for new records."
           action={
             <Button onClick={onNew}>
-              Create an analysis
+              New analysis
               <ArrowRight size={16} />
             </Button>
           }
@@ -138,16 +137,13 @@ export default function Predictions({
       <div className="card prediction-main">
         <div className="card-heading">
           <div>
-            <h3>A little foresight for your next decision</h3>
-            <p>Add new data and put your previous analysis to work.</p>
+            <h3>Generate predictions</h3>
+            <p>Choose a completed analysis and upload new records.</p>
           </div>
-          <span className="soft-icon">
-            <Sparkles size={20} />
-          </span>
         </div>
         <div className="prediction-form">
           <label className="field">
-            1. Choose what Khami has learned
+            1. Choose an analysis
             <Select
               value={analysisId}
               onChange={(event) => {
@@ -162,9 +158,7 @@ export default function Predictions({
               ))}
             </Select>
           </label>
-          <label className="field-label">
-            2. Add the data you’d like to understand
-          </label>
+          <label className="field-label">2. Upload new records</label>
           <input
             ref={fileInput}
             type="file"
@@ -196,14 +190,14 @@ export default function Predictions({
                 variant="secondary"
                 onClick={() => fileInput.current?.click()}
               >
-                Browse files
+                Choose CSV file
               </Button>
               {settings.demo && (
                 <button
                   className="text-button"
                   onClick={() => loadCsv(exampleCsv, "sample-customers.csv")}
                 >
-                  Or try a sample file
+                  Use sample file
                   <ArrowRight size={13} />
                 </button>
               )}
@@ -215,9 +209,7 @@ export default function Predictions({
               </span>
               <div>
                 <strong>{fileName}</strong>
-                <small>
-                  {preview.length.toLocaleString()} rows ready to explore
-                </small>
+                <small>{preview.length.toLocaleString()} rows ready</small>
               </div>
               <button
                 className="icon-button"
@@ -242,55 +234,43 @@ export default function Predictions({
           <div className="prediction-actions">
             <span>
               <ShieldCheck size={15} />
-              Processed on your machine
+              {settings.demo
+                ? "Sample predictions only"
+                : "Sent to your configured engine"}
             </span>
             <Button
               disabled={!csv || !analysisId}
               loading={busy}
               onClick={predict}
             >
-              {busy ? "Finding your predictions" : "Generate predictions"}
+              {busy ? "Generating predictions…" : "Generate predictions"}
               {!busy && <ArrowRight size={16} />}
             </Button>
           </div>
         </div>
       </div>
       <aside className="prediction-guide">
-        <span className="guide-icon">
-          <Lightbulb size={24} />
-        </span>
-        <h3>From patterns to possibilities.</h3>
-        <p>
-          Khami uses what it learned from your existing data to help you
-          understand what might happen next.
-        </p>
+        <h3>Prepare your CSV</h3>
         <div className="guide-step">
           <span>1</span>
           <div>
             <strong>Use matching columns</strong>
-            <p>
-              Your new file should have the same details as the data you
-              analyzed.
-            </p>
+            <p>Use the same column names as your analyzed data.</p>
           </div>
         </div>
         <div className="guide-step">
           <span>2</span>
           <div>
-            <strong>Leave the answer blank</strong>
-            <p>
-              You don’t need to include the outcome you’re asking Khami to
-              predict.
-            </p>
+            <strong>Leave out the outcome</strong>
+            <p>You can omit the column you want to predict.</p>
           </div>
         </div>
         <div className="guide-step">
           <span>3</span>
           <div>
-            <strong>Keep your judgment in the loop</strong>
+            <strong>Review the predictions</strong>
             <p>
-              Predictions help you decide. Your business experience matters,
-              too.
+              Check the results before using them to make business decisions.
             </p>
           </div>
         </div>
@@ -299,7 +279,7 @@ export default function Predictions({
         <section className="card prediction-results">
           <div className="card-heading">
             <div>
-              <h3>{busy ? "Connecting the dots…" : "Your predictions"}</h3>
+              <h3>{busy ? "Generating predictions…" : "Prediction results"}</h3>
               {result && <p>{result.summary}</p>}
             </div>
             {result && (
@@ -321,7 +301,11 @@ export default function Predictions({
           {busy ? (
             <div className="prediction-loading">
               <Loader2 className="spin" size={28} />
-              <p>Your local engine is working through the new data.</p>
+              <p>
+                {settings.demo
+                  ? "Preparing sample predictions."
+                  : "Processing the new records."}
+              </p>
             </div>
           ) : (
             result && (

@@ -41,7 +41,7 @@ export function RevenueChart({
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <ComposedChart
           data={data}
-          margin={{ top: 14, right: 7, left: -16, bottom: 0 }}
+          margin={{ top: 14, right: 7, left: -10, bottom: 8 }}
           accessibilityLayer
         >
           <defs>
@@ -60,7 +60,7 @@ export function RevenueChart({
             axisLine={false}
             tickLine={false}
             tickMargin={13}
-            tick={{ fill: "#8a918c", fontSize: 11 }}
+            tick={{ fill: "#727e6b", fontSize: 12 }}
           />
           <YAxis
             axisLine={false}
@@ -68,7 +68,7 @@ export function RevenueChart({
             tickMargin={10}
             tickCount={5}
             tickFormatter={shortMoney}
-            tick={{ fill: "#8a918c", fontSize: 10 }}
+            tick={{ fill: "#727e6b", fontSize: 11 }}
           />
           <Tooltip
             cursor={{ stroke: "#b6c9bb", strokeDasharray: "4 4" }}
@@ -149,7 +149,6 @@ export function CategoryChart({
           </div>
         ))}
       </div>
-      <div className="khami-category-caption">Revenue by category</div>
     </div>
   );
 }

@@ -12,7 +12,6 @@ import {
   KeyRound,
   LockKeyhole,
   ShieldCheck,
-  Sparkles,
   Table2,
   Target,
   XCircle,
@@ -26,7 +25,7 @@ import type {
   Mode,
   Settings,
 } from "../types";
-import { Badge, Button, Modal, Select, StepCheck } from "./UI";
+import { Button, Modal, Select, StepCheck } from "./UI";
 
 type Props = {
   settings: Settings;
@@ -64,7 +63,7 @@ export default function AnalysisWizard({
   const [labels, setLabels] = useState<Record<string, string>>({});
   const [mode, setMode] = useState<Mode>("supervised");
   const [target, setTarget] = useState("");
-  const [name, setName] = useState("My business overview");
+  const [name, setName] = useState("Business overview");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const columns = useMemo(
@@ -86,7 +85,9 @@ export default function AnalysisWizard({
         (!input.host.trim() || !input.username.trim()))
     ) {
       setError(
-        "Add your database name, host, and username so we can find your data.",
+        input.type === "sqlite"
+          ? "Enter the database file path."
+          : "Enter the database name, host, and username.",
       );
       return;
     }
@@ -148,7 +149,7 @@ export default function AnalysisWizard({
       }
     }
     if (step === 1 && !tables.length) {
-      setError("Choose at least one table to explore.");
+      setError("Choose at least one table to analyze.");
       return;
     }
     if (
@@ -156,7 +157,7 @@ export default function AnalysisWizard({
       mode === "supervised" &&
       (!target || !columns.includes(target))
     ) {
-      setError("Choose what you’d like to understand or predict.");
+      setError("Choose the column you want to predict.");
       return;
     }
     setStep(step + 1);
@@ -164,7 +165,7 @@ export default function AnalysisWizard({
 
   async function run() {
     if (!connection || !name.trim()) {
-      setError("Give this analysis a name so you can find it later.");
+      setError("Enter a name for this analysis.");
       return;
     }
     setBusy(true);
@@ -188,46 +189,44 @@ export default function AnalysisWizard({
 
   return (
     <Modal
-      title={sourceOnly ? "Connect your data" : "Let’s find your next insight"}
+      title={sourceOnly ? "Connect your database" : "New analysis"}
       subtitle={
         sourceOnly
-          ? "A secure connection to the data you already have."
-          : "A few simple choices. We’ll take care of the rest."
+          ? "Enter your database connection details."
+          : "Choose data and what you want to learn."
       }
       onClose={busy ? () => {} : onClose}
       wide
     >
       {!sourceOnly && (
         <div className="wizard-steps">
-          {["Your data", "Give it context", "Your goal", "Ready to go"].map(
-            (label, index) => (
-              <div
-                className={`wizard-step ${index === step ? "current" : ""}`}
-                key={label}
-              >
-                <StepCheck
-                  active={index === step}
-                  complete={index < step}
-                  number={index + 1}
-                />
-                <span>{label}</span>
-              </div>
-            ),
-          )}
+          {["Data source", "Tables", "Goal", "Review"].map((label, index) => (
+            <div
+              className={`wizard-step ${index === step ? "current" : ""}`}
+              key={label}
+            >
+              <StepCheck
+                active={index === step}
+                complete={index < step}
+                number={index + 1}
+              />
+              <span>{label}</span>
+            </div>
+          ))}
         </div>
       )}
       <div className="wizard-body">
         {settings.demo && (
           <div className="demo-notice">
-            <Sparkles size={15} />
-            <span>You’re in demo mode. This flow uses sample data.</span>
+            <Database size={15} />
+            <span>Demo mode uses sample data.</span>
           </div>
         )}
         {step === 0 && (
           <>
             <div className="section-heading">
-              <h3>Where does your data live?</h3>
-              <p>Choose a connected source, or add your business database.</p>
+              <h3>Choose a database</h3>
+              <p>Select an existing connection or add a database.</p>
             </div>
             {!addSource && (
               <div className="source-choices">
@@ -369,7 +368,7 @@ export default function AnalysisWizard({
                 <div className="form-actions">
                   {connections.length > 0 && (
                     <Button variant="ghost" onClick={() => setAddSource(false)}>
-                      Back to sources
+                      Back to connections
                     </Button>
                   )}
                   <Button
@@ -379,7 +378,7 @@ export default function AnalysisWizard({
                   >
                     <Database size={16} />
                     {settings.demo
-                      ? "Try sample connection"
+                      ? "Use sample connection"
                       : "Test connection"}
                   </Button>
                 </div>
@@ -388,8 +387,9 @@ export default function AnalysisWizard({
             <div className="privacy-note">
               <LockKeyhole size={16} />
               <span>
-                Your data stays on your machine. Credentials are sent only to
-                your local engine and aren’t saved in this browser.
+                {settings.demo
+                  ? "Your database won’t be contacted in demo mode."
+                  : `Connection details are sent to ${settings.engineUrl}. Passwords aren’t saved in this browser.`}
               </span>
             </div>
           </>
@@ -397,10 +397,9 @@ export default function AnalysisWizard({
         {step === 1 && (
           <>
             <div className="section-heading">
-              <h3>A little context goes a long way</h3>
+              <h3>Choose your tables</h3>
               <p>
-                Select your tables and tell us what they contain. Khami will
-                work out the details.
+                Select the tables to analyze and choose a category for each.
               </p>
             </div>
             <div className="table-choices">
@@ -465,19 +464,14 @@ export default function AnalysisWizard({
             </div>
             <div className="helper-note">
               <CircleHelp size={16} />
-              Not sure about a column? That’s okay. We also check the actual
-              data.
+              Choose the closest category. Khami also checks the data itself.
             </div>
           </>
         )}
         {step === 2 && (
           <>
             <div className="section-heading">
-              <h3>What would you like to learn?</h3>
-              <p>
-                Pick the approach that best fits your question. No technical
-                knowledge needed.
-              </p>
+              <h3>What do you want to learn?</h3>
             </div>
             <div className="mode-choices">
               <button
@@ -488,11 +482,13 @@ export default function AnalysisWizard({
                   <Target size={25} />
                 </span>
                 <span className="mode-choice-top">
-                  <strong>Understand a specific outcome</strong>
+                  <strong>Predict an outcome</strong>
                   {mode === "supervised" && <CheckCircle2 size={19} />}
                 </span>
-                <p>Find what drives a result and use it to make predictions.</p>
-                <small>“What affects our sales?” · “Who might return?”</small>
+                <p>Use past records to predict a value or outcome.</p>
+                <small>
+                  For example, which customers are likely to return.
+                </small>
               </button>
               <button
                 className={`mode-choice ${mode === "unsupervised" ? "selected" : ""}`}
@@ -502,20 +498,18 @@ export default function AnalysisWizard({
                   <FolderSearch size={25} />
                 </span>
                 <span className="mode-choice-top">
-                  <strong>Discover something new</strong>
+                  <strong>Find patterns</strong>
                   {mode === "unsupervised" && <CheckCircle2 size={19} />}
                 </span>
-                <p>
-                  Find natural groups, hidden patterns, and unusual activity.
-                </p>
+                <p>Find groups, trends, and unusual records in your data.</p>
                 <small>
-                  “Who are our customer groups?” · “What stands out?”
+                  For example, customers with similar buying habits.
                 </small>
               </button>
             </div>
             {mode === "supervised" && (
               <label className="field target-field">
-                What outcome should we focus on?
+                Column to predict
                 <Select
                   value={target}
                   onChange={(event) => setTarget(event.target.value)}
@@ -528,7 +522,8 @@ export default function AnalysisWizard({
                   ))}
                 </Select>
                 <span className="field-help">
-                  Choose the value you want to better understand or predict.
+                  Choose the column that contains the outcome in your past
+                  records.
                 </span>
               </label>
             )}
@@ -536,15 +531,9 @@ export default function AnalysisWizard({
         )}
         {step === 3 && (
           <>
-            <div className="review-hero">
-              <span>
-                <Sparkles size={26} />
-              </span>
-              <h3>Your next good decision starts here.</h3>
-              <p>
-                We’ll clean, explore, and double-check your data. You’ll get
-                clear findings you can actually use.
-              </p>
+            <div className="section-heading">
+              <h3>Review your analysis</h3>
+              <p>Check your choices, then start the analysis.</p>
             </div>
             <label className="field">
               Analysis name
@@ -567,11 +556,11 @@ export default function AnalysisWizard({
               </div>
               <div>
                 <Fingerprint size={17} />
-                <span>Your goal</span>
+                <span>Goal</span>
                 <strong>
                   {mode === "supervised"
-                    ? `Understand ${target.replaceAll("_", " ")}`
-                    : "Discover patterns"}
+                    ? `Predict ${target.replaceAll("_", " ")}`
+                    : "Find patterns"}
                 </strong>
               </div>
               <div>
@@ -579,14 +568,14 @@ export default function AnalysisWizard({
                 <span>Quality check</span>
                 <strong>
                   {mode === "supervised"
-                    ? "At least 60% predictive accuracy"
+                    ? "Prediction score of at least 60%"
                     : "Patterns checked for consistency"}
                 </strong>
               </div>
             </div>
             <div className="helper-note">
               <Check size={16} />
-              Only findings that pass our checks will appear on your dashboard.
+              Results appear only after they pass the quality check.
             </div>
           </>
         )}
@@ -611,12 +600,7 @@ export default function AnalysisWizard({
               <ArrowLeft size={16} />
               Back
             </Button>
-          ) : (
-            <Badge tone="gray">
-              <ShieldCheck size={13} />
-              Private by design
-            </Badge>
-          )}
+          ) : null}
         </div>
         {step < 3 ? (
           <Button

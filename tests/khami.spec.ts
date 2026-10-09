@@ -20,18 +20,12 @@ async function chooseGoal(page: Page, mode: "supervised" | "unsupervised") {
     // The guided flow must explain the missing outcome before moving on.
     await dialog.getByRole("button", { name: "Continue", exact: true }).click();
     await expect(dialog.getByRole("alert")).toContainText(
-      "Choose what you’d like to understand or predict",
+      "Choose the column you want to predict.",
     );
-    await dialog
-      .getByLabel("What outcome should we focus on?")
-      .selectOption("revenue");
+    await dialog.getByLabel("Column to predict").selectOption("revenue");
   } else {
-    await dialog
-      .getByRole("button", { name: "Discover something new" })
-      .click();
-    await expect(
-      dialog.getByLabel("What outcome should we focus on?"),
-    ).toHaveCount(0);
+    await dialog.getByRole("button", { name: "Find patterns" }).click();
+    await expect(dialog.getByLabel("Column to predict")).toHaveCount(0);
   }
   await dialog.getByRole("button", { name: "Continue", exact: true }).click();
 }
@@ -41,10 +35,12 @@ async function useLiveWorkspace(page: Page) {
     .getByRole("button", { name: "Open workspace settings", exact: true })
     .click();
   await page.getByLabel("Engine address").fill("http://127.0.0.1:8000");
-  await page.getByRole("switch", { name: "Use demo workspace" }).click();
-  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await page.getByRole("switch", { name: "Use sample data" }).click();
+  await page
+    .getByRole("button", { name: "Save settings", exact: true })
+    .click();
   await expect(
-    page.getByRole("switch", { name: "Use demo workspace" }),
+    page.getByRole("switch", { name: "Use sample data" }),
   ).not.toBeChecked();
 }
 
@@ -53,7 +49,7 @@ test("demo dashboard explores insights, filters analyses, and changes actual rev
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Business overview." }),
+    page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
   const revenue = page
     .locator(".metric-card")
@@ -66,11 +62,11 @@ test("demo dashboard explores insights, filters analyses, and changes actual rev
 
   await page
     .getByRole("button", {
-      name: /Your repeat customers are your best customers/,
+      name: /Returning customers generate most revenue/,
     })
     .click();
   await expect(
-    page.getByRole("dialog", { name: "A closer look" }),
+    page.getByRole("dialog", { name: "Insight details" }),
   ).toContainText("illustrative insight");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -110,12 +106,12 @@ for (const mode of ["supervised", "unsupervised"] as const) {
     await page.getByLabel("Analysis name").fill(name);
     await expect(page.getByRole("dialog")).toContainText(
       mode === "supervised"
-        ? "At least 60% predictive accuracy"
+        ? "Prediction score of at least 60%"
         : "Patterns checked for consistency",
     );
     await page.getByRole("button", { name: "Start analysis" }).click();
     const completed = page.getByRole("dialog", {
-      name: "A clearer picture is ready",
+      name: "Analysis complete",
     });
     await expect(completed).toBeVisible({ timeout: 12_000 });
     await expect(completed).toContainText(
@@ -123,13 +119,11 @@ for (const mode of ["supervised", "unsupervised"] as const) {
     );
     if (mode === "unsupervised")
       await expect(completed).not.toContainText("predictive accuracy");
-    await completed
-      .getByRole("button", { name: "Explore my insights" })
-      .click();
+    await completed.getByRole("button", { name: "View results" }).click();
     await expect(
-      page.getByRole("button", { name: `${name} Sample workspace` }),
+      page.getByRole("button", { name: `${name} Sample data` }),
     ).toBeVisible();
-    await expect(page.locator(".analysis-confidence")).toContainText(
+    await expect(page.locator(".report-validation")).toContainText(
       mode === "supervised" ? "94.2%" : "consistency checks",
     );
   });
@@ -143,11 +137,11 @@ test("CSV prediction preview generates clearly labeled sample results and export
   await expect(
     page.getByRole("button", { name: "Generate predictions" }),
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Or try a sample file" }).click();
-  await expect(page.getByText("5 rows ready to explore")).toBeVisible();
+  await page.getByRole("button", { name: "Use sample file" }).click();
+  await expect(page.getByText("5 rows ready")).toBeVisible();
   await page.getByRole("button", { name: "Generate predictions" }).click();
   await expect(
-    page.getByRole("heading", { name: "Your predictions" }),
+    page.getByRole("heading", { name: "Prediction results" }),
   ).toBeVisible();
   await expect(
     page.getByText("Sample predictions", { exact: true }),
@@ -173,21 +167,21 @@ test("live workspace keeps demo data hidden and explains the real unconfigured A
   await useLiveWorkspace(page);
   await page.getByRole("button", { name: "Test engine connection" }).click();
   await expect(page.getByRole("status")).toContainText(
-    "The local API is running. Connect your Python engine adapter",
+    "The API is running. Connect your Python program using the adapter",
   );
   await navigate(page, "Overview");
   await expect(
-    page.getByRole("heading", { name: "Good decisions start with your data." }),
+    page.getByRole("heading", { name: "No analysis results yet" }),
   ).toBeVisible();
   await expect(page.getByText("$128,430", { exact: true })).toHaveCount(0);
   await navigate(page, "Analyses");
   await expect(
-    page.getByRole("heading", { name: "Your first insight is waiting" }),
+    page.getByRole("heading", { name: "No analyses yet" }),
   ).toBeVisible();
   await navigate(page, "Predictions");
   await expect(
     page.getByRole("heading", {
-      name: "First, give Khami something to learn from",
+      name: "Run an analysis first",
     }),
   ).toBeVisible();
   await navigate(page, "Data sources");
@@ -300,14 +294,14 @@ test("a completed live response below 60% cannot expose findings or enable predi
     page.getByText("Unreliable finding", { exact: true }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole("heading", { name: "Good decisions start with your data." }),
+    page.getByRole("heading", { name: "No analysis results yet" }),
   ).toBeVisible();
   await navigate(page, "Analyses");
   await expect(page.locator("tbody tr")).toContainText("Needs attention");
   await navigate(page, "Predictions");
   await expect(
     page.getByRole("heading", {
-      name: "First, give Khami something to learn from",
+      name: "Run an analysis first",
     }),
   ).toBeVisible();
 });
@@ -381,7 +375,8 @@ test("live success handles retries, missing metrics, and database-checked CSV pr
           insights: [
             {
               title: "Order size explains the local sales pattern",
-              description: "Larger orders account for the strongest results in these 217 records.",
+              description:
+                "Larger orders account for the strongest results in these 217 records.",
               tone: "positive",
             },
           ],
@@ -395,7 +390,8 @@ test("live success handles retries, missing metrics, and database-checked CSV pr
           { category: "Supplies", quantity: 2, predicted_revenue: 48 },
           { category: "Services", quantity: 1, predicted_revenue: 120 },
         ],
-        summary: "Two new orders scored and checked against your business database.",
+        summary:
+          "Two new orders scored and checked against your business database.",
         checked_against_database: true,
       });
     }
@@ -408,30 +404,58 @@ test("live success handles retries, missing metrics, and database-checked CSV pr
   await page.getByRole("button", { name: "New analysis" }).click();
   await page.getByLabel("Database name", { exact: true }).fill("business");
   await page.getByLabel("Username", { exact: true }).fill("analyst");
-  await page.getByRole("button", { name: "Test connection", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Test connection", exact: true })
+    .click();
   await expect(page.getByRole("dialog")).toContainText("Local business sales");
   await chooseGoal(page, "supervised");
   await page.getByLabel("Analysis name").fill("Local sales analysis");
   await page.getByRole("button", { name: "Start analysis" }).click();
-  await expect(page.getByRole("dialog")).toContainText("Your local analysis is queued.");
-  await expect(page.getByRole("dialog")).toContainText("Giving your data another careful look");
-  await expect(page.getByRole("dialog")).toContainText("Your engine is refining the data and trying again.");
-  const completed = page.getByRole("dialog", { name: "A clearer picture is ready" });
+  await expect(page.getByRole("dialog")).toContainText(
+    "Your local analysis is queued.",
+  );
+  await expect(page.getByRole("dialog")).toContainText(
+    "Checking the data again",
+  );
+  await expect(page.getByRole("dialog")).toContainText(
+    "The engine is preparing the data and trying again.",
+  );
+  const completed = page.getByRole("dialog", { name: "Analysis complete" });
   await expect(completed).toBeVisible();
   await expect(completed).toContainText("81.0%");
   await expect(completed).toContainText("217");
-  await completed.getByRole("button", { name: "Explore my insights" }).click();
+  await completed.getByRole("button", { name: "View results" }).click();
 
-  await expect(page.locator(".analysis-confidence")).toContainText("81.0%");
-  await expect(page.getByText("Order size explains the local sales pattern", { exact: true })).toBeVisible();
-  for (const label of ["Total revenue", "Active customers", "Average order value", "Data quality"]) {
-    await expect(page.locator(".metric-card").filter({ hasText: label }).locator(".metric-number-row strong")).toHaveText("—");
+  await expect(page.locator(".report-validation")).toContainText("81.0%");
+  await expect(
+    page.getByText("Order size explains the local sales pattern", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  for (const label of [
+    "Total revenue",
+    "Active customers",
+    "Average order value",
+    "Data quality",
+  ]) {
+    await expect(
+      page
+        .locator(".metric-card")
+        .filter({ hasText: label })
+        .locator(".metric-value"),
+    ).toHaveText("—");
   }
   await expect(page.locator(".khami-customer-total strong")).toHaveText("—");
-  await expect(page.getByText("Occasional buyers", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Occasional buyers", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("30%", { exact: true })).toBeVisible();
-  await expect(page.getByText("No revenue history was returned for this dataset.")).toBeVisible();
-  await expect(page.getByText("No category breakdown available.")).toBeVisible();
+  await expect(
+    page.getByText("No revenue history is available for this dataset."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("No category breakdown is available."),
+  ).toBeVisible();
   await expect(page.getByText("3,842", { exact: true })).toHaveCount(0);
   await expect(page.getByText("94.2%", { exact: true })).toHaveCount(0);
 
@@ -442,14 +466,25 @@ test("live success handles retries, missing metrics, and database-checked CSV pr
     mimeType: "text/csv",
     buffer: Buffer.from(csv),
   });
-  await expect(page.getByText("2 rows ready to explore")).toBeVisible();
+  await expect(page.getByText("2 rows ready")).toBeVisible();
   await page.getByRole("button", { name: "Generate predictions" }).click();
-  await expect(page.getByRole("heading", { name: "Your predictions" })).toBeVisible();
-  await expect(page.getByText("Checked against your database", { exact: true })).toBeVisible();
-  await expect(page.getByText("Sample predictions", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Prediction results" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Checked against your database", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Sample predictions", { exact: true }),
+  ).toHaveCount(0);
   await expect(page.locator(".prediction-results tbody tr")).toHaveCount(2);
-  await expect(page.locator(".prediction-results tbody tr").last()).toContainText("120");
-  expect(predictionRequest).toEqual({ analysis_id: "live-success-analysis", csv });
+  await expect(
+    page.locator(".prediction-results tbody tr").last(),
+  ).toContainText("120");
+  expect(predictionRequest).toEqual({
+    analysis_id: "live-success-analysis",
+    csv,
+  });
   expect(polls).toBe(3);
   expect(browserErrors).toEqual([]);
 });
@@ -458,7 +493,7 @@ test("mobile dashboard and navigation fit the viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Business overview." }),
+    page.getByRole("heading", { name: "Overview", exact: true }),
   ).toBeVisible();
   const overflow = () =>
     page.evaluate(
@@ -468,7 +503,7 @@ test("mobile dashboard and navigation fit the viewport", async ({ page }) => {
   await page.getByRole("button", { name: "Open navigation" }).click();
   await navigate(page, "Predictions");
   await expect(
-    page.getByRole("heading", { name: "What could come next." }),
+    page.getByRole("heading", { name: "Predictions", exact: true }),
   ).toBeVisible();
   expect(await overflow()).toBe(false);
   await page.getByRole("button", { name: "Open navigation" }).click();
